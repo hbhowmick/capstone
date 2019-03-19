@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+  <div class="container">
+    <div class="row top-margin-md">
+      <div class="col-md-6 offset-md-3">
+        <!-- <h3 class="bottom-margin-sm">Address Search:</h3> -->
+        {{ wtf.quick_form(form_Address) }}
+      </div> <!-- ends col 4 for Address Search -->
+    </div> <!-- ends row -->
+  </div> <!-- ends container -->
+{% endblock %}

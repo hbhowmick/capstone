@@ -1,0 +1,54 @@
+body {
+  overflow-x: hidden;
+}
+
+.top-margin-lg {
+  margin-top: 100px;
+}
+
+.top-margin-md {
+  margin-top: 50px;
+}
+
+.bottom-margin-sm {
+  margin-bottom: 30px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+html, body, #viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#buttonsDiv {
+position: absolute;
+top: 85px;
+right: 30px;
+padding: 12px;
+background-color: rgba(200, 200, 200, 0.5);
+border: 1px solid black;
+}
+
+#indicatorSpan {
+  display: inline-block;
+  vertical-align: middle;
+  width: 30px;
+  height: 30px;
+  background-color: rgba(100, 100, 100, 0.8);
+  border: 2px solid #ccc;
+}
+
+footer {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+footer p {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 25px;
+  text-align: justify;
+}
