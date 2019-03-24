@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block metadata %}
+  <ul>
+    {% for key, item in metadata %}
+      <meta name="{{key}}" content="{{ item }}" />
+      <meta charset="utf-8">
+      <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <!-- ArcGIS API CSS -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <!-- ArcGIS API JS -->
+  <script src="https://js.arcgis.com/4.10/"></script>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Legend"
+      // "dojo/domReady!"
+    ], function(Map, SceneView, FeatureLayer, Legend) {
+
+      let editFeature, highlight;
+
+      // Code to create the map and view will go here
+      var map = new Map({
+        basemap: "dark-gray",
+        ground: "world-elevation"
+      });
+      var view = new SceneView({
+        container: "viewDiv", // Reference to the DOM node that will contain the view
+        map: map, // References the map object created above
+      });
+
+      var up_boundary = new FeatureLayer({
+        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/UP_boundary/FeatureServer/0?token=6_C5qtle0Y9Gp8n1TMvHZLCmUdOlYH-7Qga_pfvsykN2VOybD_E5Q1_N1t449KAjKFN8sUJwo2uA1pyn5bxhklFpaeppD9x1ksYWKOAhN1BjA3xKSRxwg8OmQnCa8B9UxbqOixBImuPvs5FICno6B5keHySMBEcEADgSxlw6a3bOID9LuftPcXBZccBKHd8hNEYKsHEsW7Uj6-MbVtl565ZZlCZcyt_9qG9JCFNBbWeFxhaR33-7ohtC9nUfuSkXk2hR8RPQNuA7roE9Xe7t-w..",
+      });
+
+      var symbol_boundary = {
+        type: "polygon-3d",
+        symbolLayers: [{
+          type: "fill",
+          material: {
+            color: [255, 255, 255, 0.2]
+          }
+        }]
+      };
+
+      up_boundary.renderer = {
+        type: "simple",
+        symbol: symbol_boundary
+      };
+
+      up_boundary.when(function(){
+        view.goTo(up_boundary.fullExtent);
+      });
+
+
+      var renderer_bldg = {
+        type: "unique-value", // autocasts as new UniqueValueRenderer()
+        defaultSymbol: {
+          type: "polygon-3d", // autocasts as new PolygonSymbol3D()
+          symbolLayers: [{
+            type: "extrude", // autocasts as new ExtrudeSymbol3DLayer()
+            material: {
+              color: "#A7C636"
+            },
+            edges: {
+              type: "solid",
+              color: "#4d5b18",
+              size: 1.5
+            }
+          }]
+        },
+        visualVariables: [{
+          type: "size",
+          field: "Height_m",
+          valueUnit: "feet" // Converts and extrudes all data values in feet
+        }]
+      };
+
+      var existing_bldgs= new FeatureLayer({
+        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP/FeatureServer/0?token=S1HaLJeDfLNQ1fSq37d6s14VFYWS8yjohUjJQWmOXhuC_QJ5xbkAJidNkwtCsa7X5NmDFRt_pSdWl8IzQsbkFPMvIgGRfvYc2Rib9g572YyrNpUIbev71vY1pIUxUfSoLUogCLGgkkCM2GEkpUVOatumwQzRMCu-2SxHr9rbygAH6FU4e8gziPy0yRwhEdNSipML7nGBPWt6dBll8YQkB7AmfjvYZpSAgvSTtizfFNO3Apu1P01_VzDliUhJoIo5zsnUphHPPQ44T0r_BF2epw..",
+
+        renderer: renderer_bldg,
+        definitionExpression: "Height_m > 0", // show only buildings with height
+      });
+
+      
+
+      map.add(up_boundary);
+      map.add(existing_bldgs);
+
+      // Register events for control
+      var rotateAntiClockwiseSpan = document.getElementById("rotateAntiClockwiseSpan");
+      var rotateClockwiseSpan = document.getElementById("rotateClockwiseSpan");
+      var indicatorSpan = document.getElementById("indicatorSpan");
+      rotateClockwiseSpan.addEventListener("click", function() {
+        rotateView(-1);
+      });
+      indicatorSpan.addEventListener("click", titlView);
+
+      // Watch the change on view.camera
+      view.watch("camera", updateIndicator);
+
+      // Create the event's callback functions
+      function rotateView(direction) {
+        var heading = view.camera.heading;
+
+        // Set the heading of the view to the closest multiple of 90 degrees, depending on the direction of rotation
+        if (direction > 0) {
+          heading = Math.floor((heading + 1e-3) / 90) * 90 + 90;
+        } else {
+          heading = Math.ceil((heading - 1e-3) / 90) * 90 - 90;
+        }
+
+        view.goTo({
+          heading: heading
+        });
+      }
+
+      function titlView() {
+        // Get the camera tilt and add a small number for numerical inaccuracies
+        var tilt = view.camera.tilt + 1e-3;
+
+        // Switch between 3 levels of tilt
+        if (tilt >=80 ) {
+          tilt = 0;
+        } else if (tilt >= 40) {
+          tilt = 80;
+        } else {
+          tilt = 40;
+        }
+
+        view.goTo({
+          tilt: tilt
+        });
+      }
+
+      function updateIndicator(camera) {
+        var tilt = camera.tilt;
+        var heading = camera.heading;
+
+        // Update the indicator to reflect the current tilt/heading using css transforms
+        var transform = "rotateX(" + 0.8 * tilt + "deg( rotateY(0) rotateZ(" + -heading + "deg)";
+
+        indicatorSpan.style["transform"] = transform;
+        indicatorSpan.style["-webkit-transform"] = transform; // Solution for Safari
+      }
+    });
+  </script>
+{% endblock %}
+
+
+{% block app_content %}
+  <div id="viewDiv"></div>
+  <div id="buttonsDiv">
+    <button id="rotateAntiClockwiseSpan" title="Rotate 90°">↻</button>
+    <button id="indicatorSpan"></button>
+    <button id="rotateClockwiseSpan" title="Rotate 90°">↺</button>
+  </div>
+{% endblock %}

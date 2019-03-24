@@ -10,6 +10,10 @@ body {
   margin-top: 50px;
 }
 
+.bottom-margin-lg {
+  margin-bottom: 100px;
+}
+
 .bottom-margin-sm {
   margin-bottom: 30px;
 }
@@ -43,12 +47,30 @@ border: 1px solid black;
   border: 2px solid #ccc;
 }
 
-footer {
-  background-color: rgba(0, 0, 0, 0.8);
+#editArea {
+  background-color: white;
 }
 
-footer p {
-  color: rgba(255, 255, 255, 0.8);
-  padding: 25px;
-  text-align: justify;
+footer {
+  background-color: rgba(0, 0, 0, 0.8);
+  font-size: 15px;
+  padding: 20px 20px 20px 0px;
 }
+
+ #footer_contact {
+   text-decoration: none;
+   text-align: right;
+   color: white;
+ }
+
+ footer a, p {
+   text-decoration: none;
+   color: #949495;
+   font-size: 13px;
+   margin-bottom: 0;
+ }
+
+ footer a:hover {
+   text-decoration: none;
+   color: white;
+ }

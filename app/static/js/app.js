@@ -13,14 +13,6 @@ function searchAddress() {
   console.log(city);
   console.log(state);
   console.log(zip);
-
-  //
-  // let url =`http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&address=${street}&city=${city}&region=${state}&postal=${zip}`;
-  //
-  // $.get(url, function(res) {
-  //   console.log(res);
-  //
-  // });
 }
 
 // check to see if the submit button is pressed, if it is, stop the even from refreshing the page, and call searchAddress()

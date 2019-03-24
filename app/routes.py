@@ -8,13 +8,20 @@ from app.forms import AddressForm
 @app.route('/index', methods=['GET', 'POST'])
 def index():
     form_Address = AddressForm()
-
     if form_Address.validate_on_submit():
         street = form_Address.street.data
         city = form_Address.city.data
         state = form_Address.state.data
         zip = form_Address.zip.data
         return redirect('sceneview.html', form_Address=form_Address, street=street, city=city, state=state, zip=zip)
+
+    def extents(fc):
+        extent = arcpy.Describe(fc).extent
+        west = extent.XMin
+        south = extent.YMin
+        east = extent.XMax
+        north = extent.YMax
+        return west, south, east, north
 
     return render_template('index.html', title='Home', form_Address=form_Address)
 
