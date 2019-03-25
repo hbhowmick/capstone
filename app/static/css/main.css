@@ -51,6 +51,89 @@ border: 1px solid black;
   background-color: white;
 }
 
+#infoDiv{
+  position: absolute;
+  top: 70px;
+  left: 15px;
+}
+
+#infoDiv input {
+  border: none;
+  box-shadow:  rgba(0, 0, 0, 0.3) 0px 1px 2px;
+}
+
+.esri-zoom {
+  position: fixed;
+  top: 110px;
+}
+
+.esri-navigation-toggle, .esri-compass {
+  position: relative;
+  top: 115px;
+}
+
+/* div[title="Zoom In"] {
+  position: fixed;
+  top: 101px;
+}
+
+div[title="Zoom Out"] {
+  position: fixed;
+  top: 132px;
+} */
+
+.editArea-container {
+  background: #fff;
+  font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.5em;
+  overflow: auto;
+  padding: 12px 15px;
+  width: 300px;
+}
+
+.list-heading {
+  font-weight: normal;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #323232;
+}
+
+.or-wrap {
+  background-color: #e0e0e0;
+  height: 1px;
+  margin: 2em 0;
+  overflow: visible;
+}
+
+.or-text {
+  background: #fff;
+  line-height: 0;
+  padding: 0 1em;
+  position: relative;
+  bottom: 0.75em;
+}
+
+/* override default styles */
+.esri-feature-form {
+  background: #fff;
+}
+
+.esri-feature-templates {
+  width: 280px;
+}
+
+.esri-feature-templates__section-header {
+  display: none;
+}
+
+.esri-feature-templates__section {
+  box-shadow: none;
+}
+
+.esri-feature-templates__list {
+  max-height: 180px;
+}
+
 footer {
   background-color: rgba(0, 0, 0, 0.8);
   font-size: 15px;

@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+
+{% block metadata %}
+  <ul>
+    {% for key, item in metadata %}
+      <meta name="{{key}}" content="{{ item }}" />
+      <meta charset="utf-8">
+      <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <!-- <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    #infoDiv{
+      position: absolute;
+      top: 280px;
+      left: 15px;
+    }
+
+    #infoDiv input {
+      border: none;
+      box-shadow:  rgba(0, 0, 0, 0.3) 0px 1px 2px;
+    }
+  </style> -->
+  <!-- ArcGIS API CSS -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <!-- ArcGIS API JS -->
+  <script src="https://js.arcgis.com/4.10/"></script>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/views/SceneView",
+      "esri/layers/FeatureLayer"
+    ], function (Map, MapView, SceneView, FeatureLayer) {
+      var switchButton = document.getElementById("switch-btn");
+
+      var appConfig = {
+        mapView: null,
+        sceneView: null,
+        activeView: null,
+        container: "viewDiv"  // use same container for views
+      };
+
+      var map = new Map({
+        basemap: "dark-gray",
+        ground: "world-elevation"
+      });
+
+
+      var renderer_2d_bldg = {
+        type: "simple",  // autocasts as new SimpleRenderer()
+        symbol: {
+          type: "simple-fill",  // autocasts as new SimpleFillSymbol()
+          color: "#A7C636",
+          style: "solid",
+          outline: {  // autocasts as new SimpleLineSymbol()
+            color: "#4d5b18",
+            width: 0.5
+          }
+        }
+      };
+
+      var existing_2d_bldgs= new FeatureLayer({
+        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP/FeatureServer/0?token=S1HaLJeDfLNQ1fSq37d6s14VFYWS8yjohUjJQWmOXhuC_QJ5xbkAJidNkwtCsa7X5NmDFRt_pSdWl8IzQsbkFPMvIgGRfvYc2Rib9g572YyrNpUIbev71vY1pIUxUfSoLUogCLGgkkCM2GEkpUVOatumwQzRMCu-2SxHr9rbygAH6FU4e8gziPy0yRwhEdNSipML7nGBPWt6dBll8YQkB7AmfjvYZpSAgvSTtizfFNO3Apu1P01_VzDliUhJoIo5zsnUphHPPQ44T0r_BF2epw..",
+
+        renderer: renderer_2d_bldg,
+      });
+
+      var renderer_3d_bldg = {
+        type: "unique-value", // autocasts as new UniqueValueRenderer()
+        defaultSymbol: {
+          type: "polygon-3d", // autocasts as new PolygonSymbol3D()
+          symbolLayers: [{
+            type: "extrude", // autocasts as new ExtrudeSymbol3DLayer()
+            material: {
+              color: "#A7C636"
+            },
+            edges: {
+              type: "solid",
+              color: "#4d5b18",
+              size: 1.5
+            }
+          }]
+        },
+        visualVariables: [{
+          type: "size",
+          field: "Height_m",
+          valueUnit: "meters" // Extrudes all data values in meters
+        }]
+      };
+
+      var existing_3d_bldgs= new FeatureLayer({
+        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP/FeatureServer/0?token=S1HaLJeDfLNQ1fSq37d6s14VFYWS8yjohUjJQWmOXhuC_QJ5xbkAJidNkwtCsa7X5NmDFRt_pSdWl8IzQsbkFPMvIgGRfvYc2Rib9g572YyrNpUIbev71vY1pIUxUfSoLUogCLGgkkCM2GEkpUVOatumwQzRMCu-2SxHr9rbygAH6FU4e8gziPy0yRwhEdNSipML7nGBPWt6dBll8YQkB7AmfjvYZpSAgvSTtizfFNO3Apu1P01_VzDliUhJoIo5zsnUphHPPQ44T0r_BF2epw..",
+
+        renderer: renderer_3d_bldg,
+        definitionExpression: "Height_m > 0" // show only buildings with height
+      });
+
+      map.add(existing_2d_bldgs);
+      map.add(existing_3d_bldgs);
+
+      var mapview = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-70.941578, 42.158],
+        zoom: 15
+      });
+
+      var sceneview = new SceneView({
+        container: "viewDiv", // Reference to the DOM node that will contain the view
+        map: map, // References the map object created above
+      });
+
+      // create 2D view and and set active
+      appConfig.mapView = mapview;
+      appConfig.mapView.map = map;
+      appConfig.activeView = appConfig.mapView;
+
+      // create 3D view, won't initialize until container is set
+      sceneview.container = null;
+      appConfig.sceneView = sceneview;
+
+      // switch the view between 2D and 3D each time the button is clicked
+      switchButton.addEventListener("click", function(){
+        switchView();
+      });
+
+      // Switches the view from 2D to 3D and vice versa
+      function switchView(){
+        var is3D = appConfig.activeView.type === "3d";
+        var activeViewpoint = appConfig.activeView.viewpoint.clone();
+
+        // remove the reference to the container for the previous view
+        appConfig.activeView.container = null;
+
+        if (is3D){
+          // if the input view is a SceneView, set the viewpoint on the mapView instance. Set the container on the mapView and flag it as the active view
+          appConfig.mapView.viewpoint = activeViewpoint;
+          appConfig.mapView.container = appConfig.container;
+          appConfig.activeView = appConfig.mapView;
+          switchButton.value = "3D";
+        } else {
+          appConfig.sceneView.viewpoint = activeViewpoint;
+          appConfig.sceneView.container = appConfig.container;
+          appConfig.activeView = appConfig.sceneView;
+          switchButton.value = "2D";
+        }
+      }
+
+    });
+  </script>
+{% endblock %}
+
+
+{% block app_content %}
+<body>
+  <div id="viewDiv"></div>
+  <div id="infoDiv">
+    <input class="esri-component esri-widget--button esri-widget esri-interactive"
+      type="button" id="switch-btn" value="3D">
+  </div>
+</body>
+{% endblock %}

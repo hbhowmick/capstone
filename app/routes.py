@@ -29,3 +29,18 @@ def index():
 def sceneview():
     metadata = {'keywords': 'viewport', 'description':'initial-scale=1, maximum-scale=1, user-scalable=no'}
     return render_template('sceneview.html', title='3D Scene')
+
+@app.route('/switch')
+def switch():
+    metadata = {'keywords': 'viewport', 'description':'initial-scale=1, maximum-scale=1, user-scalable=no'}
+    return render_template('switch.html', title='Switch 2D to 3D')
+
+@app.route('/form')
+def form():
+    metadata = {'keywords': 'viewport', 'description':'initial-scale=1, maximum-scale=1, user-scalable=no'}
+    return render_template('form.html', title='Feature Form')
+
+@app.route('/sketch')
+def sketch():
+    metadata = {'keywords': 'viewport', 'description':'initial-scale=1, maximum-scale=1, user-scalable=no'}
+    return render_template('sketch.html', title='Sketch Footprint')
