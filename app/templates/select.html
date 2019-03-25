@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block metadata %}
+  <ul>
+    {% for key, item in metadata %}
+      <meta name="{{key}}" content="{{ item }}" />
+      <meta charset="utf-8">
+      <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    #info,
+    #gridDisplay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 35%;
+      background-color: white;
+      border-color: grey;
+      width: 100%;
+      font-family: "Avenir Next W00", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    #gridDisplay {
+      z-index: 80;
+    }
+
+    #info {
+      z-index: 90;
+      font-size: 16px;
+      padding-left: 20px;
+    }
+
+    #info * {
+      padding-right: 20px;
+    }
+
+    .info {
+      line-height: 20px;
+      padding-left: 5px ! important;
+    }
+
+    .dgrid-header,
+    .dgrid-header-row {
+      background-color: #eee;
+      color: #57585A;
+    }
+
+    .dgrid-row-even {
+      background-color: #F7F8F8;
+    }
+
+    .dgrid-row-odd {
+      background-color: #EFEFEF;
+    }
+
+    .dgrid-selected {
+      background: #B4DAF5;
+    }
+
+    .dgrid-row {
+      border: none
+    }
+  </style>
+  <!-- ArcGIS API CSS -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.10/esri/css/main.css">
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <!-- ArcGIS API JS -->
+  <script src="https://js.arcgis.com/4.10/"></script>
+  <script>
+    require([
+      "esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer"
+    ], function (Map, MapView, FeatureLayer) {
+
+      var map = new Map({
+        basemap: "dark-gray",
+        ground: "world-elevation"
+      });
+
+      var renderer_2d_bldg = {
+        type: "simple",  // autocasts as new SimpleRenderer()
+        symbol: {
+          type: "simple-fill",  // autocasts as new SimpleFillSymbol()
+          color: "#A7C636",
+          style: "solid",
+          outline: {  // autocasts as new SimpleLineSymbol()
+            color: "#4d5b18",
+            width: 0.5
+          }
+        }
+      };
+
+      var existing_2d_bldgs= new FeatureLayer({
+        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP/FeatureServer/0?token=S1HaLJeDfLNQ1fSq37d6s14VFYWS8yjohUjJQWmOXhuC_QJ5xbkAJidNkwtCsa7X5NmDFRt_pSdWl8IzQsbkFPMvIgGRfvYc2Rib9g572YyrNpUIbev71vY1pIUxUfSoLUogCLGgkkCM2GEkpUVOatumwQzRMCu-2SxHr9rbygAH6FU4e8gziPy0yRwhEdNSipML7nGBPWt6dBll8YQkB7AmfjvYZpSAgvSTtizfFNO3Apu1P01_VzDliUhJoIo5zsnUphHPPQ44T0r_BF2epw..",
+
+        renderer: renderer_2d_bldg,
+      });
+
+      map.add(existing_2d_bldgs);
+
+      var mapview = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-70.941578, 42.158],
+        zoom: 15
+      });
+
+      //
+      // // create 2D view and and set active
+      // appConfig.mapView = mapview;
+      // appConfig.mapView.map = map;
+      // appConfig.activeView = appConfig.mapView;
+
+
+    });
+  </script>
+{% endblock %}
+
+
+{% block app_content %}
+<body>
+  <div id="viewDiv">
+    <div id="select-by-polygon" class="esri-widget esri-widget--button esri-widget esri-interactive"
+      title="Select features by polygon">
+      <span class="esri-icon-checkbox-unchecked"></span>
+    </div>
+
+    <div id="info">
+      <span class="info">
+        <b>Instructions</b>
+      </span>
+      <br />
+      <ul>
+        <li> Select features using select by polygon tool. Attributes of
+          selected features will be displayed here.</li>
+        <br />
+        <li> Click on a row to select a feature associated with it or click on
+          a feature to display its popup.</li>
+      </ul>
+    </div>
+
+    <div id="gridDisplay">
+      <span class="info" id="featureCount"></span>
+      <div id="grid"></div>
+    </div>
+  </div>
+</body>
+{% endblock %}

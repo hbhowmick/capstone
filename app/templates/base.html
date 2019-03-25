@@ -58,20 +58,20 @@
             <a class="nav-link" href="{{ url_for('switch') }}">Switch 2D to 3D</a>
           </li>
 
-          {% if title == 'Feature Form' %}
-          <li class="nav-item active">
-          {% else %}
-          <li class="nav-item">
-          {% endif %}
-            <a class="nav-link" href="{{ url_for('form') }}">Feature Form</a>
-          </li>
-
           {% if title == 'Sketch Footprint' %}
           <li class="nav-item active">
           {% else %}
           <li class="nav-item">
           {% endif %}
             <a class="nav-link" href="{{ url_for('sketch') }}">Sketch Footprint</a>
+          </li>
+
+          {% if title == 'Feature Form' %}
+          <li class="nav-item active">
+          {% else %}
+          <li class="nav-item">
+          {% endif %}
+            <a class="nav-link" href="{{ url_for('form') }}">Feature Form</a>
           </li>
 
         </ul>
