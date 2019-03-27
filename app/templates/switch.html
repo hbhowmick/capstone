@@ -22,12 +22,17 @@
   <script src="https://js.arcgis.com/4.10/"></script>
   <script>
     require([
+      "esri/widgets/Sketch",
       "esri/Map",
+      "esri/layers/GraphicsLayer",
       "esri/views/MapView",
       "esri/views/SceneView",
-      "esri/layers/FeatureLayer"
-    ], function (Map, MapView, SceneView, FeatureLayer) {
+      "esri/layers/FeatureLayer",
+      "esri/PopupTemplate"
+    ], function (Sketch, Map, GraphicsLayer, MapView, SceneView, FeatureLayer, PopupTemplate) {
       var switchButton = document.getElementById("switch-btn");
+
+      var graphLayer = new GraphicsLayer();
 
       var appConfig = {
         mapView: null,
@@ -40,7 +45,6 @@
         basemap: "dark-gray",
         ground: "world-elevation"
       });
-
 
       var renderer_2d_bldg = {
         type: "simple",  // autocasts as new SimpleRenderer()
@@ -55,10 +59,19 @@
         }
       };
 
+      var popupTemplate = new PopupTemplate({
+        title: "Population in {NAME}",
+        content: "As of 2010, the population in this area was <b>{POP2010:NumberFormat}</b>." +
+        "As of 2013, the population here was <b>{POP2013:NumberFormat}</b>." +
+        "Percent change is {POP2013:populationChange}"
+      });
+
       var existing_2d_bldgs= new FeatureLayer({
-        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP/FeatureServer/0?token=S1HaLJeDfLNQ1fSq37d6s14VFYWS8yjohUjJQWmOXhuC_QJ5xbkAJidNkwtCsa7X5NmDFRt_pSdWl8IzQsbkFPMvIgGRfvYc2Rib9g572YyrNpUIbev71vY1pIUxUfSoLUogCLGgkkCM2GEkpUVOatumwQzRMCu-2SxHr9rbygAH6FU4e8gziPy0yRwhEdNSipML7nGBPWt6dBll8YQkB7AmfjvYZpSAgvSTtizfFNO3Apu1P01_VzDliUhJoIo5zsnUphHPPQ44T0r_BF2epw..",
+        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP_bldgUse/FeatureServer/0?token=q5H6ukgdpH1_tbTqpgaVZs9lAgkvtXVeFTDMqel6LdDV1IzdddXMXINsMOgwmtVgOIxEYC7GpQzgC8VYVcxZw2V-FmQPyoVLl40gfSVG0yv9xHTj2AnoibPPgPZNfGtu52z_8X_IIXW38dt25XXwo_pefzrFZISWCQS2ztValHnX_fasIR91jO6dE5wUTL-H8nJENCzdwzwYjmlrrsiSX_jZ9_hq4SktxWDkTkrgQynf5vSYLpHlYcFEpGoAZXbl72w3Piw7aqQjRKmJ-67y-Q..",
 
         renderer: renderer_2d_bldg,
+        popupTemplate: popupTemplate
+
       });
 
       var renderer_3d_bldg = {
@@ -84,15 +97,19 @@
         }]
       };
 
+
       var existing_3d_bldgs= new FeatureLayer({
-        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP/FeatureServer/0?token=S1HaLJeDfLNQ1fSq37d6s14VFYWS8yjohUjJQWmOXhuC_QJ5xbkAJidNkwtCsa7X5NmDFRt_pSdWl8IzQsbkFPMvIgGRfvYc2Rib9g572YyrNpUIbev71vY1pIUxUfSoLUogCLGgkkCM2GEkpUVOatumwQzRMCu-2SxHr9rbygAH6FU4e8gziPy0yRwhEdNSipML7nGBPWt6dBll8YQkB7AmfjvYZpSAgvSTtizfFNO3Apu1P01_VzDliUhJoIo5zsnUphHPPQ44T0r_BF2epw..",
+        url: "https://services9.arcgis.com/weq496GDPYhWyZDR/arcgis/rest/services/structures_UP_bldgUse/FeatureServer/0?token=q5H6ukgdpH1_tbTqpgaVZs9lAgkvtXVeFTDMqel6LdDV1IzdddXMXINsMOgwmtVgOIxEYC7GpQzgC8VYVcxZw2V-FmQPyoVLl40gfSVG0yv9xHTj2AnoibPPgPZNfGtu52z_8X_IIXW38dt25XXwo_pefzrFZISWCQS2ztValHnX_fasIR91jO6dE5wUTL-H8nJENCzdwzwYjmlrrsiSX_jZ9_hq4SktxWDkTkrgQynf5vSYLpHlYcFEpGoAZXbl72w3Piw7aqQjRKmJ-67y-Q..",
 
         renderer: renderer_3d_bldg,
-        definitionExpression: "Height_m > 0" // show only buildings with height
+        definitionExpression: "Height_m > 0", // show only buildings with height
+        popupTemplate: popupTemplate
       });
+
 
       map.add(existing_2d_bldgs);
       map.add(existing_3d_bldgs);
+      map.add(graphLayer);
 
       var mapview = new MapView({
         container: "viewDiv",
@@ -110,6 +127,16 @@
       appConfig.mapView = mapview;
       appConfig.mapView.map = map;
       appConfig.activeView = appConfig.mapView;
+
+      // if appConfig.activeView.type === "2d":
+      mapview.when(function() {
+        const sketch = new Sketch({
+          layer: graphLayer,
+          view: mapview
+        });
+        mapview.ui.add(sketch, "top-right");
+      });
+
 
       // create 3D view, won't initialize until container is set
       sceneview.container = null;

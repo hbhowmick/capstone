@@ -67,20 +67,20 @@ border: 1px solid black;
   top: 110px;
 }
 
-.esri-navigation-toggle, .esri-compass {
-  position: relative;
-  top: 115px;
+.esri-navigation-toggle {
+  position: fixed;
+  top: 180px;
 }
 
-/* div[title="Zoom In"] {
+.esri-compass {
   position: fixed;
-  top: 101px;
+  top: 250px;
 }
 
-div[title="Zoom Out"] {
+.esri-sketch {
   position: fixed;
-  top: 132px;
-} */
+  top: 80px;
+}
 
 .editArea-container {
   background: #fff;
